@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1081667053225",
+    "firebase_url": "https://android-search-by-image-d9331.firebaseio.com",
+    "project_id": "android-search-by-image-d9331",
+    "storage_bucket": "android-search-by-image-d9331.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081667053225:android:ef8c691242e4d03c",
+        "android_client_info": {
+          "package_name": "mx.ivancastro.android_search_by_image"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1081667053225-bboqkk77idm8afeni5ih6nev37b57omu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCriBk2YVxEXnuIH18aA7R19HkD0895AbU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
