@@ -53,9 +53,14 @@ public class MainActivity extends AppCompatActivity {
         txtView = findViewById(R.id.txtView);
         btnLabels = findViewById(R.id.btnLabels);
 
-        btnSnap.setOnClickListener((v) -> dispatchTakePictureIntent());
-        btnText.setOnClickListener((v) -> getText());
-        btnLabels.setOnClickListener((v) -> detectLandmarks());
+        btnSnap.setText("Open Test!");
+        btnSnap.setOnClickListener((v) ->{
+            dispatchTakePictureIntent();
+            Intent intent = new Intent(this, Test_label.class);
+            startActivity(intent);
+        });
+        //btnText.setOnClickListener((v) -> getText());
+        //btnLabels.setOnClickListener((v) -> detectLandmarks());
     }
 
     // Landmakrs
