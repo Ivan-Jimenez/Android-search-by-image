@@ -2,7 +2,9 @@ package mx.ivancastro.android_search_by_image;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -10,12 +12,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.cloud.FirebaseVisionCloudDetectorOptions;
 import com.google.firebase.ml.vision.cloud.label.FirebaseVisionCloudLabel;
 import com.google.firebase.ml.vision.cloud.label.FirebaseVisionCloudLabelDetector;
+import com.google.firebase.ml.vision.cloud.landmark.FirebaseVisionCloudLandmark;
+import com.google.firebase.ml.vision.cloud.landmark.FirebaseVisionCloudLandmarkDetector;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.common.FirebaseVisionLatLng;
 import com.google.firebase.ml.vision.text.FirebaseVisionCloudTextRecognizerOptions;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
@@ -46,10 +53,52 @@ public class MainActivity extends AppCompatActivity {
         txtView = findViewById(R.id.txtView);
         btnLabels = findViewById(R.id.btnLabels);
 
-
         btnSnap.setOnClickListener((v) -> dispatchTakePictureIntent());
         btnText.setOnClickListener((v) -> getText());
-        btnLabels.setOnClickListener((v) -> getLabels());
+        btnLabels.setOnClickListener((v) -> detectLandmarks());
+    }
+
+    // Landmakrs
+    private void detectLandmarks () {
+        FirebaseVisionCloudDetectorOptions options =
+                new FirebaseVisionCloudDetectorOptions.Builder()
+                .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
+                .setMaxResults(15)
+                .build();
+
+        // Create FirebaseVisionImage from a bitmap object
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
+
+        // Get an instance of FirebaseVisionCloudLandmarkDetector
+        FirebaseVisionCloudLandmarkDetector detector = FirebaseVision.getInstance()
+                .getVisionCloudLandmarkDetector(options); // replace the default options for ours
+
+        // Pass the image in the detectInImage method
+        Task<List<FirebaseVisionCloudLandmark>> result = detector.detectInImage(image)
+                .addOnSuccessListener(firebaseVisionCloudLandmarks -> {
+                    // task completed successfully
+                    // get information about landmark
+                    for (FirebaseVisionCloudLandmark landmark: firebaseVisionCloudLandmarks) {
+                        Rect bounds = landmark.getBoundingBox();
+                        String landmarkName = landmark.getLandmark();
+                        String landmarkId = landmark.getEntityId();
+                        float confidence = landmark.getConfidence();
+
+                        // put in the TextView
+                        Toast.makeText(this, "place: " + landmarkName + confidence, Toast.LENGTH_SHORT).show();
+
+                        // Multiple locations are possible, e.g., the location of the depicted
+                        // landmark and the location the picture was taken.
+                        for (FirebaseVisionLatLng loc: landmark.getLocations()) {
+                            double latitude = loc.getLatitude();
+                            double longitude = loc.getLongitude();
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // task completed with an exception
+                    Toast.makeText(this, "Error trying to find Landmarks", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void getLabels () {
