@@ -24,35 +24,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mx.ivancastro.android_search_by_image.cloud.imagelabeling.CloudImageLabelingProcessor;
+import mx.ivancastro.android_search_by_image.cloud.landmarkrecognition.CloudLandmarkRecognitionProcessor;
 import mx.ivancastro.android_search_by_image.common.GraphicOverlay;
 import mx.ivancastro.android_search_by_image.common.VisionImageProcessor;
 
 /**
  * Activity for testing feature detector for labeling
  */
-public class Test_label extends AppCompatActivity {
-    private static final String TAG = "Test_label";
+public class MainScreenActivity extends AppCompatActivity {
+    private static final String TAG = "MainScreenActivity";
 
     // TODO: fix the android:layout_toEndOf="@id/firePreview" if something wrong
 
-    // FIXME: Images and labels loads out  of focus
+    // FIXME: Images and labels loads out  of focus. Change aspect ratio
 
-    // TODO: Translate labels to spanish. Change text color
+    // TODO: Translate labels to spanish. Change text color.
 
-    private static final String CLOUD_LABEL_DETECTION = "Cloud Label";
+    // TODO: Implement permissions in execution time.
+
+    // TODO: Change size off the options menu
+
+    private static final String CLOUD_LABEL_DETECTION    = "Cloud Label";
+    private static final String CLOUD_LANDMARK_DETECTION = "Cloud Landmark";
 
     private static final String SIZE_PREVIEW  = "w:max"; // Available on-screen width.
     private static final String SIZE_1024_768 = "w.1024"; // 1024 * 768 in a normal ratio
     private static final String SIZE_640_480  = "w:640"; // 640 * 480 in a normal ratio
 
     // TODO: Check what is happening with this.
-    private static final String KEY_IMAGE_URI = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_URI";
-    private static final String KEY_IMAGE_MAX_WIDTH = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_MAX_WIDTH";
+    private static final String KEY_IMAGE_URI        = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_URI";
+    private static final String KEY_IMAGE_MAX_WIDTH  = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_MAX_WIDTH";
     private static final String KEY_IMAGE_MAX_HEIGHT = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_MAX_HEIGHT";
-    private static final String KEY_SELECTED_SIZE = "mx.ivancastrotest.firebase.ml.KEY_SELECTED_SIZE";
+    private static final String KEY_SELECTED_SIZE    = "mx.ivancastrotest.firebase.ml.KEY_SELECTED_SIZE";
 
     private static final int REQUEST_IMAGE_CAPTURE = 1001;
-    private static final int REQUEST_CHOOSE_IMAGE = 1002;
+    private static final int REQUEST_CHOOSE_IMAGE  = 1002;
 
     private Button getImageButton;
     private ImageView preview;
@@ -78,7 +84,7 @@ public class Test_label extends AppCompatActivity {
         getImageButton = findViewById(R.id.getImageButton);
         getImageButton.setOnClickListener((v) -> {
             // Menu for selecting either: a) take a new photo b) select one from existing
-            PopupMenu popupMenu = new PopupMenu(Test_label.this, v);
+            PopupMenu popupMenu = new PopupMenu(MainScreenActivity.this, v);
             popupMenu.setOnMenuItemClickListener((item) -> {
                 switch (item.getItemId()) {
                     case R.id.select_images_from_local:
@@ -99,21 +105,22 @@ public class Test_label extends AppCompatActivity {
         if (preview ==  null) Log.d(TAG, "Preview is null!");
 
         graphicOverlay = findViewById(R.id.previewOverlay);
-        if (graphicOverlay == null) Log.d(TAG, "graphicOverlay is null");
+        if (graphicOverlay == null) Log.d(TAG, "graphicChange aspect ratioOverlay is null");
 
         populateFeatureSelector();
         populateSizeSelector();
 
         // TODO: use a method when add more detectors
-        imageProcessor = new CloudImageLabelingProcessor();
+        //imageProcessor = new CloudImageLabelingProcessor();
+        createImageProcessor();
 
         isLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         if (savedInstanceState != null) {
-            imageUri = savedInstanceState.getParcelable(KEY_IMAGE_URI);
-            imageMaxWidth = savedInstanceState.getInt(KEY_IMAGE_MAX_WIDTH);
+            imageUri       = savedInstanceState.getParcelable(KEY_IMAGE_URI);
+            imageMaxWidth  = savedInstanceState.getInt(KEY_IMAGE_MAX_WIDTH);
             imageMaxHeight = savedInstanceState.getInt(KEY_IMAGE_MAX_HEIGHT);
-            selectedSize = savedInstanceState.getString(KEY_SELECTED_SIZE);
+            selectedSize   = savedInstanceState.getString(KEY_SELECTED_SIZE);
 
             if (imageUri != null) tryReloadAndDetectImage();
         }
@@ -167,6 +174,7 @@ public class Test_label extends AppCompatActivity {
         Spinner featureSpinner = findViewById(R.id.featureSelector);
         List<String> options = new ArrayList<>();
         options.add(CLOUD_LABEL_DETECTION); // For now
+        options.add(CLOUD_LANDMARK_DETECTION);
 
         // Creating the adapter for featureSpiner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_style, options);
@@ -178,12 +186,24 @@ public class Test_label extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedMode = parent.getItemAtPosition(position).toString();
-                imageProcessor = new CloudImageLabelingProcessor();
+                //imageProcessor = new CloudImageLabelingProcessor();
+                createImageProcessor();
                 tryReloadAndDetectImage();
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });
+    }
+
+    private void createImageProcessor() {
+        switch (selectedMode) {
+            case CLOUD_LABEL_DETECTION:
+                imageProcessor = new CloudImageLabelingProcessor();
+                break;
+            case CLOUD_LANDMARK_DETECTION:
+                imageProcessor = new CloudLandmarkRecognitionProcessor();
+                break;
+        }
     }
 
     private void populateSizeSelector () {
