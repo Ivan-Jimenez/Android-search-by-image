@@ -28,7 +28,6 @@
             android:value="ocr" />
 
         <activity android:name=".InfoActivity" />
-        <activity android:name=".util.MapActivity"></activity>
     </application>
 
 </manifest>
