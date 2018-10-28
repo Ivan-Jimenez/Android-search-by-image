@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Search By Image</string>
+    <string name="latitude">latitude</string>
 </resources>

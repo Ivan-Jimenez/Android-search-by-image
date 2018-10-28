@@ -28,6 +28,8 @@
             android:value="ocr" />
 
         <activity android:name=".InfoActivity" />
+        <activity android:name=".LocationActivity" />
+        <activity android:name=".SimilarImagesActivity"></activity>
     </application>
 
 </manifest>

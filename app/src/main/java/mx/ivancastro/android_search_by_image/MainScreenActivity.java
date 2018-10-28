@@ -1,32 +1,34 @@
 package mx.ivancastro.android_search_by_image;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.Spinner;
+
+import com.google.firebase.ml.vision.common.FirebaseVisionLatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mx.ivancastro.android_search_by_image.cloud.imagelabeling.CloudImageLabelingProcessor;
 import mx.ivancastro.android_search_by_image.cloud.landmarkrecognition.CloudLandmarkRecognitionProcessor;
 import mx.ivancastro.android_search_by_image.common.GraphicOverlay;
-import mx.ivancastro.android_search_by_image.common.VisionImageProcessor;
 
 /**
  * Activity for testing feature detector for labeling
@@ -44,6 +46,8 @@ public class MainScreenActivity extends AppCompatActivity {
 
     // TODO: Change size off the options menu
 
+    // TODO: Implement notification for the user when no landmarks found.
+
     private static final String CLOUD_LABEL_DETECTION    = "Cloud Label";
     private static final String CLOUD_LANDMARK_DETECTION = "Cloud Landmark";
 
@@ -60,7 +64,10 @@ public class MainScreenActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1001;
     private static final int REQUEST_CHOOSE_IMAGE  = 1002;
 
+    private static final int PERMISSION_REQUESTS = 1;
+
     private Button getImageButton;
+    private Button getActionButton;
     private ImageView preview;
     private GraphicOverlay graphicOverlay;
     private String selectedMode = CLOUD_LABEL_DETECTION;
@@ -74,12 +81,16 @@ public class MainScreenActivity extends AppCompatActivity {
     // Max height (portrait mode)
     private Integer imageMaxHeight;
     private Bitmap bitmapForDetection;
-    private VisionImageProcessor imageProcessor;
+    //private VisionImageProcessor imageProcessor;
+    private CloudLandmarkRecognitionProcessor imageProcessor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test_label);
+        setContentView(R.layout.activity_main_screen);
+
+        if (!allPermissionsGranted()) getRuntimePermissions();
+        imageProcessor = new CloudLandmarkRecognitionProcessor();
 
         getImageButton = findViewById(R.id.getImageButton);
         getImageButton.setOnClickListener((v) -> {
@@ -101,18 +112,46 @@ public class MainScreenActivity extends AppCompatActivity {
             inflater.inflate(R.menu.camera_button_menu, popupMenu.getMenu());
             popupMenu.show();
         });
+        getActionButton = findViewById(R.id.getActionButton);
+        getActionButton.setOnClickListener((v) -> {
+            // Menu for selecting for the user to select what to do
+            PopupMenu popupMenu = new PopupMenu(MainScreenActivity.this, v);
+            popupMenu.setOnMenuItemClickListener((item) -> {
+                Intent intent;
+                switch (item.getItemId()) {
+                    case R.id.web_search:
+                        intent = new Intent(this, InfoActivity.class);
+                        startActivity(intent);
+                        return true;
+                    case R.id.show_location:
+                        intent = new Intent(this, LocationActivity.class);
+                        List<FirebaseVisionLatLng> locations = imageProcessor.getLocations();
+                        // Since multiple locations are possible we only take the first one.
+                        FirebaseVisionLatLng location = locations.get(0);
+                        intent.putExtra("latitude",  location.getLatitude());
+                        intent.putExtra("longitude", location.getLongitude());
+                        startActivity(intent);
+                        return true;
+                    case R.id.similar_images:
+                        intent = new Intent(this, SimilarImagesActivity.class);
+                        startActivity(intent);
+                        return true;
+                        default:
+                            return false;
+                }
+            });
+            MenuInflater inflater = popupMenu.getMenuInflater();
+            inflater.inflate(R.menu.action_button_menu, popupMenu.getMenu());
+            popupMenu.show();
+        });
         preview = findViewById(R.id.previewPane);
         if (preview ==  null) Log.d(TAG, "Preview is null!");
 
         graphicOverlay = findViewById(R.id.previewOverlay);
         if (graphicOverlay == null) Log.d(TAG, "graphicChange aspect ratioOverlay is null");
 
-        populateFeatureSelector();
-        populateSizeSelector();
-
-        // TODO: use a method when add more detectors
-        //imageProcessor = new CloudImageLabelingProcessor();
-        createImageProcessor();
+        //populateFeatureSelector();
+        //populateSizeSelector();
 
         isLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
@@ -170,6 +209,7 @@ public class MainScreenActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Seleccionar Imagen"), REQUEST_CHOOSE_IMAGE);
     }
 
+    /*
     private void populateFeatureSelector () {
         Spinner featureSpinner = findViewById(R.id.featureSelector);
         List<String> options = new ArrayList<>();
@@ -187,14 +227,17 @@ public class MainScreenActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedMode = parent.getItemAtPosition(position).toString();
                 //imageProcessor = new CloudImageLabelingProcessor();
-                createImageProcessor();
+                //createImageProcessor();
+                imageProcessor = new CloudLandmarkRecognitionProcessor();
                 tryReloadAndDetectImage();
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });
     }
+    */
 
+    /*
     private void createImageProcessor() {
         switch (selectedMode) {
             case CLOUD_LABEL_DETECTION:
@@ -204,8 +247,9 @@ public class MainScreenActivity extends AppCompatActivity {
                 imageProcessor = new CloudLandmarkRecognitionProcessor();
                 break;
         }
-    }
+    }*/
 
+    /*
     private void populateSizeSelector () {
         Spinner sizeSpinner = findViewById(R.id.sizeSelector);
         List<String> options = new ArrayList<>();
@@ -228,7 +272,7 @@ public class MainScreenActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });
-    }
+    }*/
 
     private void tryReloadAndDetectImage () {
         try {
@@ -313,5 +357,43 @@ public class MainScreenActivity extends AppCompatActivity {
                     findViewById(R.id.controlPanel).getHeight();
         }
         return imageMaxHeight;
+    }
+
+    private String[] getRequiredPermissions () {
+        try {
+            PackageInfo info = this.getPackageManager()
+                    .getPackageInfo(this.getPackageName(), PackageManager.GET_PERMISSIONS);
+            String[] permissions = info.requestedPermissions;
+            if (permissions != null && permissions.length > 0) return permissions;
+            else return new String[0];
+        } catch (Exception e) { return new String[0]; }
+    }
+
+    private boolean allPermissionsGranted () {
+        for (String permission : getRequiredPermissions()) {
+            if (!isPermissionGranted(this, permission)) return false;
+        }
+        return true;
+    }
+
+    private void getRuntimePermissions () {
+        List<String> allNeededPermissions = new ArrayList<>();
+        for (String permission : getRequiredPermissions()) {
+            if (!isPermissionGranted(this, permission)) allNeededPermissions.add(permission);
+        }
+
+        if (!allNeededPermissions.isEmpty()) {
+            ActivityCompat.requestPermissions(
+                    this, allNeededPermissions.toArray(new String[0]), PERMISSION_REQUESTS);
+        }
+    }
+
+    private static boolean isPermissionGranted (Context context, String permission) {
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Permission granted: " + permission);
+            return true;
+        }
+        Log.i(TAG, "Permission NOT granted: " + permission);
+        return false;
     }
 }

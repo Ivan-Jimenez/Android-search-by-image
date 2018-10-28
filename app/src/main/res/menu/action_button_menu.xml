@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/web_search"
+        android:title="Información"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/show_location"
+        android:title="Ubicación"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/similar_images"
+        android:title="Imágenes Similares"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+</menu>

@@ -36,17 +36,19 @@
         android:layout_alignParentBottom="true"
         android:background="#000">
 
+        <!--
         <Spinner
             android:id="@+id/featureSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right" />
-
+-->
+        <!--
         <Spinner
             android:id="@+id/sizeSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal" /> -->
 
         <Button
             android:id="@+id/getImageButton"
@@ -54,6 +56,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:text="Tomar foto" />
+
+        <Button
+            android:id="@+id/getActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="accion"
+            android:layout_gravity="center"/>
 
     </FrameLayout>
 
