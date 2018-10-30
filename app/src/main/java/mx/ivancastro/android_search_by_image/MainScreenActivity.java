@@ -130,6 +130,7 @@ public class MainScreenActivity extends AppCompatActivity {
                         FirebaseVisionLatLng location = locations.get(0);
                         intent.putExtra("latitude",  location.getLatitude());
                         intent.putExtra("longitude", location.getLongitude());
+                        intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
                         startActivity(intent);
                         return true;
                     case R.id.similar_images:

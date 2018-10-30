@@ -30,6 +30,8 @@ public class CloudLandmarkRecognitionProcessor
     // Landmark location
     private List<FirebaseVisionLatLng> locations;
 
+    private String landmarkName;
+
     public CloudLandmarkRecognitionProcessor () {
         super();
         FirebaseVisionCloudDetectorOptions options =
@@ -56,6 +58,8 @@ public class CloudLandmarkRecognitionProcessor
             FirebaseVisionCloudLandmark landmark = landmarks.get(i);
             Log.d(TAG, "cloud landmark: " + landmark);
 
+            landmarkName = landmark.getLandmark();
+
             locations = landmark.getLocations();
 
             CloudLandmarkGraphic cloudLandmarkGraphic = new CloudLandmarkGraphic(graphicOverlay);
@@ -75,4 +79,10 @@ public class CloudLandmarkRecognitionProcessor
      * @return
      */
     public List<FirebaseVisionLatLng> getLocations () { return locations; }
+
+    /**
+     * Landmark's name
+     * @return
+     */
+    public String getLandmarkName () { return landmarkName; }
 }
