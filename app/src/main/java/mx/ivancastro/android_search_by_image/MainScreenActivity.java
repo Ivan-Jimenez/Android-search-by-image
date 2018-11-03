@@ -121,6 +121,7 @@ public class MainScreenActivity extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.web_search:
                         intent = new Intent(this, InfoActivity.class);
+                        intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
                         startActivity(intent);
                         return true;
                     case R.id.show_location:
