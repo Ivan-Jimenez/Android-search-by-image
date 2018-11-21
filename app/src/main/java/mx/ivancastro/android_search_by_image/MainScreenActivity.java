@@ -49,7 +49,6 @@ public class MainScreenActivity extends AppCompatActivity {
     // TODO: Implement notification for the user when no landmarks found.
 
     private static final String CLOUD_LABEL_DETECTION    = "Cloud Label";
-    private static final String CLOUD_LANDMARK_DETECTION = "Cloud Landmark";
 
     private static final String SIZE_PREVIEW  = "w:max"; // Available on-screen width.
     private static final String SIZE_1024_768 = "w.1024"; // 1024 * 768 in a normal ratio
@@ -70,7 +69,6 @@ public class MainScreenActivity extends AppCompatActivity {
     private Button getActionButton;
     private ImageView preview;
     private GraphicOverlay graphicOverlay;
-    private String selectedMode = CLOUD_LABEL_DETECTION;
     private String selectedSize = SIZE_PREVIEW;
 
     boolean isLandscape;
@@ -134,10 +132,6 @@ public class MainScreenActivity extends AppCompatActivity {
                         intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
                         startActivity(intent);
                         return true;
-                    case R.id.similar_images:
-                        intent = new Intent(this, SimilarImagesActivity.class);
-                        startActivity(intent);
-                        return true;
                         default:
                             return false;
                 }
@@ -151,9 +145,6 @@ public class MainScreenActivity extends AppCompatActivity {
 
         graphicOverlay = findViewById(R.id.previewOverlay);
         if (graphicOverlay == null) Log.d(TAG, "graphicChange aspect ratioOverlay is null");
-
-        //populateFeatureSelector();
-        //populateSizeSelector();
 
         isLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
@@ -210,71 +201,6 @@ public class MainScreenActivity extends AppCompatActivity {
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Seleccionar Imagen"), REQUEST_CHOOSE_IMAGE);
     }
-
-    /*
-    private void populateFeatureSelector () {
-        Spinner featureSpinner = findViewById(R.id.featureSelector);
-        List<String> options = new ArrayList<>();
-        options.add(CLOUD_LABEL_DETECTION); // For now
-        options.add(CLOUD_LANDMARK_DETECTION);
-
-        // Creating the adapter for featureSpiner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_style, options);
-        // Dropdown layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Attaching data adapter to spinner
-        featureSpinner.setAdapter(dataAdapter);
-        featureSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedMode = parent.getItemAtPosition(position).toString();
-                //imageProcessor = new CloudImageLabelingProcessor();
-                //createImageProcessor();
-                imageProcessor = new CloudLandmarkRecognitionProcessor();
-                tryReloadAndDetectImage();
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
-    }
-    */
-
-    /*
-    private void createImageProcessor() {
-        switch (selectedMode) {
-            case CLOUD_LABEL_DETECTION:
-                imageProcessor = new CloudImageLabelingProcessor();
-                break;
-            case CLOUD_LANDMARK_DETECTION:
-                imageProcessor = new CloudLandmarkRecognitionProcessor();
-                break;
-        }
-    }*/
-
-    /*
-    private void populateSizeSelector () {
-        Spinner sizeSpinner = findViewById(R.id.sizeSelector);
-        List<String> options = new ArrayList<>();
-        options.add(SIZE_PREVIEW);
-        options.add(SIZE_1024_768);
-        options.add(SIZE_640_480);
-
-        // Creating adapter for featureSpinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_style, options);
-        // Dropdown layout style -list view width radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Attaching data adapter to spinner
-        sizeSpinner.setAdapter(dataAdapter);
-        sizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedSize = parent.getItemAtPosition(position).toString();
-                tryReloadAndDetectImage();
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
-    }*/
 
     private void tryReloadAndDetectImage () {
         try {

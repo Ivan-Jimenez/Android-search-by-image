@@ -35,21 +35,13 @@ public class LocationActivity extends FragmentActivity implements
 
     // TODO: Implement panoramic view
 
-    /**
-     * The amount by which the scroll camera. This is given in pixels no dp
-     */
-    private static final int SCROLL_BY_PX = 100;
-
     // Landmark location
     private static double latitude;
     private static double longitude;
     private String landmarkName;
     private static CameraPosition LANDMARK;
 
-    private boolean isCancel = false;
-
     private GoogleMap mMap;
-
 
     private Button zoomButton;
 

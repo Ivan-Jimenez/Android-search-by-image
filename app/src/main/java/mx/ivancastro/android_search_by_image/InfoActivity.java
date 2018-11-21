@@ -26,7 +26,8 @@ public class InfoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String landmarkName = intent.getStringExtra("landmarkName");
 
-        // In order to concatenate the landmarname we need replace the white spaces with an underscore
+        // We need replace the white spaces with an underscore, so we can search the landmark in
+        // Wikipedia
         landmarkName = landmarkName.replace(' ', '_');
 
         infoWebView = findViewById(R.id.infoWebView);
