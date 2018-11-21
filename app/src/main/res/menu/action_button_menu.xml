@@ -9,8 +9,4 @@
         android:title="Ubicación"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item android:id="@+id/similar_images"
-        android:title="Imágenes Similares"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
 </menu>
