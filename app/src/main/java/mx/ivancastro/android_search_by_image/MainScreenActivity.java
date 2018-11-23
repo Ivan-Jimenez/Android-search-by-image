@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.ml.vision.common.FirebaseVisionLatLng;
 
 import java.io.IOException;
@@ -90,26 +91,13 @@ public class MainScreenActivity extends AppCompatActivity {
         if (!allPermissionsGranted()) getRuntimePermissions();
         imageProcessor = new CloudLandmarkRecognitionProcessor();
 
-        getImageButton = findViewById(R.id.getImageButton);
-        getImageButton.setOnClickListener((v) -> {
-            // Menu for selecting either: a) take a new photo b) select one from existing
-            PopupMenu popupMenu = new PopupMenu(MainScreenActivity.this, v);
-            popupMenu.setOnMenuItemClickListener((item) -> {
-                switch (item.getItemId()) {
-                    case R.id.select_images_from_local:
-                        startChooseImageFromResult();
-                        return true;
-                    case R.id.take_photo_using_camera:
-                        startCameraIntentForResult();
-                        return true;
-                        default:
-                            return false;
-                }
-            });
-            MenuInflater inflater = popupMenu.getMenuInflater();
-            inflater.inflate(R.menu.camera_button_menu, popupMenu.getMenu());
-            popupMenu.show();
-        });
+        FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
+        fabCamera.setOnClickListener(v -> startCameraIntentForResult());
+
+        FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
+        fabGallery.setOnClickListener(v -> startChooseImageFromResult());
+
+        /*
         getActionButton = findViewById(R.id.getActionButton);
         getActionButton.setOnClickListener((v) -> {
             // Menu for selecting for the user to select what to do
@@ -139,7 +127,7 @@ public class MainScreenActivity extends AppCompatActivity {
             MenuInflater inflater = popupMenu.getMenuInflater();
             inflater.inflate(R.menu.action_button_menu, popupMenu.getMenu());
             popupMenu.show();
-        });
+        });*/
         preview = findViewById(R.id.previewPane);
         if (preview ==  null) Log.d(TAG, "Preview is null!");
 
@@ -268,7 +256,7 @@ public class MainScreenActivity extends AppCompatActivity {
             // Calculate the max width in portrait mode. This is done lazily since we need to wait
             // for a UI layout pass to get the right values. So delay it to first time image rendering time.
             if (isLandscape) imageMaxWidth =
-                    ((View) preview.getParent()).getHeight() - findViewById(R.id.controlPanel).getHeight();
+                    ((View) preview.getParent()).getHeight(); //- findViewById(R.id.controlPanel).getHeight();
             else imageMaxWidth = ((View) preview.getParent()).getWidth();
         }
         return imageMaxWidth;
@@ -281,8 +269,8 @@ public class MainScreenActivity extends AppCompatActivity {
             // Calculate the max width in portrait mode. This is done lazily since we need to wait
             // for a UI layout pass to get the right values. So delay it to first time image rendering time.
             if (isLandscape) imageMaxHeight = ((View) preview.getParent()).getWidth();
-            else imageMaxHeight = ((View) preview.getParent()).getHeight() -
-                    findViewById(R.id.controlPanel).getHeight();
+            else imageMaxHeight = ((View) preview.getParent()).getHeight(); //-
+                    //findViewById(R.id.controlPanel).getHeight();
         }
         return imageMaxHeight;
     }
