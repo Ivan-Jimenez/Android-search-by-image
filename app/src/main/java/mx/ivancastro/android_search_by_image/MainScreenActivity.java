@@ -15,11 +15,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.ml.vision.common.FirebaseVisionLatLng;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import mx.ivancastro.android_search_by_image.cloud.landmarkrecognition.CloudLandmarkRecognitionProcessor;
 import mx.ivancastro.android_search_by_image.common.GraphicOverlay;
+import mx.ivancastro.android_search_by_image.util.Connection;
 
 /**
  * Activity for testing feature detector for labeling
@@ -49,8 +51,6 @@ public class MainScreenActivity extends AppCompatActivity {
 
     // TODO: Implement notification for the user when no landmarks found.
 
-    private static final String CLOUD_LABEL_DETECTION    = "Cloud Label";
-
     private static final String SIZE_PREVIEW  = "w:max"; // Available on-screen width.
     private static final String SIZE_1024_768 = "w.1024"; // 1024 * 768 in a normal ratio
     private static final String SIZE_640_480  = "w:640"; // 640 * 480 in a normal ratio
@@ -66,8 +66,6 @@ public class MainScreenActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUESTS = 1;
 
-    private Button getImageButton;
-    private Button getActionButton;
     private ImageView preview;
     private GraphicOverlay graphicOverlay;
     private String selectedSize = SIZE_PREVIEW;
@@ -79,7 +77,6 @@ public class MainScreenActivity extends AppCompatActivity {
     private Integer imageMaxWidth;
     // Max height (portrait mode)
     private Integer imageMaxHeight;
-    private Bitmap bitmapForDetection;
     //private VisionImageProcessor imageProcessor;
     private CloudLandmarkRecognitionProcessor imageProcessor;
 
@@ -97,37 +94,6 @@ public class MainScreenActivity extends AppCompatActivity {
         FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
         fabGallery.setOnClickListener(v -> startChooseImageFromResult());
 
-        /*
-        getActionButton = findViewById(R.id.getActionButton);
-        getActionButton.setOnClickListener((v) -> {
-            // Menu for selecting for the user to select what to do
-            PopupMenu popupMenu = new PopupMenu(MainScreenActivity.this, v);
-            popupMenu.setOnMenuItemClickListener((item) -> {
-                Intent intent;
-                switch (item.getItemId()) {
-                    case R.id.web_search:
-                        intent = new Intent(this, InfoActivity.class);
-                        intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
-                        startActivity(intent);
-                        return true;
-                    case R.id.show_location:
-                        intent = new Intent(this, LocationActivity.class);
-                        List<FirebaseVisionLatLng> locations = imageProcessor.getLocations();
-                        // Since multiple locations are possible we only take the first one.
-                        FirebaseVisionLatLng location = locations.get(0);
-                        intent.putExtra("latitude",  location.getLatitude());
-                        intent.putExtra("longitude", location.getLongitude());
-                        intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
-                        startActivity(intent);
-                        return true;
-                        default:
-                            return false;
-                }
-            });
-            MenuInflater inflater = popupMenu.getMenuInflater();
-            inflater.inflate(R.menu.action_button_menu, popupMenu.getMenu());
-            popupMenu.show();
-        });*/
         preview = findViewById(R.id.previewPane);
         if (preview ==  null) Log.d(TAG, "Preview is null!");
 
@@ -143,6 +109,44 @@ public class MainScreenActivity extends AppCompatActivity {
             selectedSize   = savedInstanceState.getString(KEY_SELECTED_SIZE);
 
             if (imageUri != null) tryReloadAndDetectImage();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu) {
+        new MenuInflater(this).inflate(R.menu.action_button_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected (MenuItem item) {
+        // Check internet connection
+        Connection conn = new Connection();
+        if (!conn.checkInternetConnection(this)) return false;
+        if (!imageProcessor.hasDetected()) {
+            Toast.makeText(this,"No se encontró nada en la imagen.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.web_search:
+                intent = new Intent(this, InfoActivity.class);
+                intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
+                startActivity(intent);
+                return true;
+            case R.id.show_location:
+                intent = new Intent(this, LocationActivity.class);
+                List<FirebaseVisionLatLng> locations = imageProcessor.getLocations();
+                // Since multiple locations are possible we only take the first one.
+                FirebaseVisionLatLng location = locations.get(0);
+                intent.putExtra("latitude",  location.getLatitude());
+                intent.putExtra("longitude", location.getLongitude());
+                intent.putExtra("landmarkName", imageProcessor.getLandmarkName());
+                startActivity(intent);
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -217,9 +221,7 @@ public class MainScreenActivity extends AppCompatActivity {
                     true);
 
             preview.setImageBitmap(resizedBitmap);
-            bitmapForDetection = resizedBitmap;
-
-            imageProcessor.process(bitmapForDetection, graphicOverlay);
+            imageProcessor.process(resizedBitmap, graphicOverlay);
         } catch (IOException e) {
             Log.e(TAG, "Error retrieving saved image");
         }

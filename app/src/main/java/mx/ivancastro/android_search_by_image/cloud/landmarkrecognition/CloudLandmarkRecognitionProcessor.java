@@ -2,7 +2,6 @@ package mx.ivancastro.android_search_by_image.cloud.landmarkrecognition;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
@@ -31,6 +30,7 @@ public class CloudLandmarkRecognitionProcessor
     private List<FirebaseVisionLatLng> locations;
 
     private String landmarkName;
+    private boolean detected = false;
 
     public CloudLandmarkRecognitionProcessor () {
         super();
@@ -71,18 +71,19 @@ public class CloudLandmarkRecognitionProcessor
     @Override
     protected void onFailure (@NonNull Exception e) {
         Log.e(TAG, "Cloud Landmak Detection Failed!" + e);
+        detected = false;
     }
 
     /**
      * Multiple locations are possible, e.g., the location of the depicted
      * landmark an the location the picture was taken.
-     * @return
+     * @return List object with the locations detected.
      */
     public List<FirebaseVisionLatLng> getLocations () { return locations; }
 
     /**
-     * Landmark's name
-     * @return
+     * @return Landmark's name
      */
     public String getLandmarkName () { return landmarkName; }
+    public boolean hasDetected () { return detected; }
 }
