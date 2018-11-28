@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Search By Image</string>
+    <string name="app_name">Landmarks</string>
     <string name="latitude">latitude</string>
     <string name="title_activity_location">Map</string>
     <string name="acercar">Acercar</string>

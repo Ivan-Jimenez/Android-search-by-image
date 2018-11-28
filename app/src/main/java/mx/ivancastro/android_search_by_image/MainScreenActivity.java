@@ -7,6 +7,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -31,11 +33,7 @@ import java.util.List;
 
 import mx.ivancastro.android_search_by_image.cloud.landmarkrecognition.CloudLandmarkRecognitionProcessor;
 import mx.ivancastro.android_search_by_image.common.GraphicOverlay;
-import mx.ivancastro.android_search_by_image.util.Connection;
 
-/**
- * Activity for testing feature detector for labeling
- */
 public class MainScreenActivity extends AppCompatActivity {
     private static final String TAG = "MainScreenActivity";
 
@@ -89,10 +87,16 @@ public class MainScreenActivity extends AppCompatActivity {
         imageProcessor = new CloudLandmarkRecognitionProcessor();
 
         FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
-        fabCamera.setOnClickListener(v -> startCameraIntentForResult());
+        fabCamera.setOnClickListener(v -> {
+            if (!checkInternetConnection(this)) return;
+            startCameraIntentForResult();
+        });
 
         FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
-        fabGallery.setOnClickListener(v -> startChooseImageFromResult());
+        fabGallery.setOnClickListener(v -> {
+            if (!checkInternetConnection(this)) return;
+            startChooseImageFromResult();
+        });
 
         preview = findViewById(R.id.previewPane);
         if (preview ==  null) Log.d(TAG, "Preview is null!");
@@ -120,13 +124,13 @@ public class MainScreenActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected (MenuItem item) {
-        // Check internet connection
-        Connection conn = new Connection();
-        if (!conn.checkInternetConnection(this)) return false;
+        // Check if had found a landmark in the image
         if (!imageProcessor.hasDetected()) {
             Toast.makeText(this,"No se encontró nada en la imagen.", Toast.LENGTH_SHORT).show();
             return false;
         }
+        // Check internet connection
+        if (!checkInternetConnection(this)) return false;
 
         Intent intent;
         switch (item.getItemId()) {
@@ -179,12 +183,13 @@ public class MainScreenActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.TITLE, "Nueva Foto");
-            values.put(MediaStore.Images.Media.DESCRIPTION, "Desde la Camara");
+            values.put(MediaStore.Images.Media.TITLE, "new photo");
+            values.put(MediaStore.Images.Media.DESCRIPTION, "from camera");
             imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
+        if (imageUri == null || imageUri.getPath().equals("")) preview.setImageResource(R.drawable.main_bg);
     }
 
     private void startChooseImageFromResult () {
@@ -313,5 +318,22 @@ public class MainScreenActivity extends AppCompatActivity {
         }
         Log.i(TAG, "Permission NOT granted: " + permission);
         return false;
+    }
+
+    /**
+     * Checks if the internet connection is available.
+     * @param context of the activity from where is call.
+     * @return true if is connected
+     */
+    private  boolean checkInternetConnection (Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo != null) {
+            return networkInfo.isAvailable() && networkInfo.isConnected();
+        } else {
+            Toast.makeText(context, "No tienes conexión a Internet.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 }

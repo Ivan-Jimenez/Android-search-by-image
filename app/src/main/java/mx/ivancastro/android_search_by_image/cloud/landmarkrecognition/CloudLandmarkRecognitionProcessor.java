@@ -30,7 +30,7 @@ public class CloudLandmarkRecognitionProcessor
     private List<FirebaseVisionLatLng> locations;
 
     private String landmarkName;
-    private boolean detected = false;
+    private boolean detected;
 
     public CloudLandmarkRecognitionProcessor () {
         super();
@@ -65,6 +65,8 @@ public class CloudLandmarkRecognitionProcessor
             CloudLandmarkGraphic cloudLandmarkGraphic = new CloudLandmarkGraphic(graphicOverlay);
             graphicOverlay.add(cloudLandmarkGraphic);
             cloudLandmarkGraphic.updateLandmark(landmark);
+
+            detected = true;
         }
     }
 
