@@ -1,5 +1,6 @@
 package mx.ivancastro.android_search_by_image;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -33,27 +34,15 @@ import java.util.List;
 
 import mx.ivancastro.android_search_by_image.cloud.landmarkrecognition.CloudLandmarkRecognitionProcessor;
 import mx.ivancastro.android_search_by_image.common.GraphicOverlay;
+import mx.ivancastro.android_search_by_image.custommodel.CustomImageClassifierProcessor;
 
 public class MainScreenActivity extends AppCompatActivity {
     private static final String TAG = "MainScreenActivity";
-
-    // TODO: fix the android:layout_toEndOf="@id/firePreview" if something wrong
-
-    // FIXME: Images and labels loads out  of focus. Change aspect ratio
-
-    // TODO: Translate labels to spanish. Change text color.
-
-    // TODO: Implement permissions in execution time.
-
-    // TODO: Change size off the options menu
-
-    // TODO: Implement notification for the user when no landmarks found.
 
     private static final String SIZE_PREVIEW  = "w:max"; // Available on-screen width.
     private static final String SIZE_1024_768 = "w.1024"; // 1024 * 768 in a normal ratio
     private static final String SIZE_640_480  = "w:640"; // 640 * 480 in a normal ratio
 
-    // TODO: Check what is happening with this.
     private static final String KEY_IMAGE_URI        = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_URI";
     private static final String KEY_IMAGE_MAX_WIDTH  = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_MAX_WIDTH";
     private static final String KEY_IMAGE_MAX_HEIGHT = "mx.ivancastrotest.firebase.ml.KEY_IMAGE_MAX_HEIGHT";
@@ -76,7 +65,9 @@ public class MainScreenActivity extends AppCompatActivity {
     // Max height (portrait mode)
     private Integer imageMaxHeight;
     //private VisionImageProcessor imageProcessor;
-    private CloudLandmarkRecognitionProcessor imageProcessor;
+    //private CloudLandmarkRecognitionProcessor imageProcessor;
+
+    private CustomImageClassifierProcessor imageProcessor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,17 +75,17 @@ public class MainScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_screen);
 
         if (!allPermissionsGranted()) getRuntimePermissions();
-        imageProcessor = new CloudLandmarkRecognitionProcessor();
+        imageProcessor = new CustomImageClassifierProcessor();
 
         FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
         fabCamera.setOnClickListener(v -> {
-            if (!checkInternetConnection(this)) return;
+            //if (!checkInternetConnection(this)) return;
             startCameraIntentForResult();
         });
 
         FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
         fabGallery.setOnClickListener(v -> {
-            if (!checkInternetConnection(this)) return;
+            //if (!checkInternetConnection(this)) return;
             startChooseImageFromResult();
         });
 
@@ -122,6 +113,7 @@ public class MainScreenActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /*
     @Override
     public boolean onOptionsItemSelected (MenuItem item) {
         // Check if had found a landmark in the image
@@ -152,7 +144,7 @@ public class MainScreenActivity extends AppCompatActivity {
             default:
                 return false;
         }
-    }
+    } */
 
     @Override
     public void onSaveInstanceState (Bundle outState) {
@@ -226,7 +218,7 @@ public class MainScreenActivity extends AppCompatActivity {
                     true);
 
             preview.setImageBitmap(resizedBitmap);
-            imageProcessor.process(resizedBitmap, graphicOverlay);
+            imageProcessor.process(resizedBitmap, graphicOverlay, this);
         } catch (IOException e) {
             Log.e(TAG, "Error retrieving saved image");
         }
