@@ -33,6 +33,12 @@
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp" />
 
+        <Spinner
+            android:id="@+id/modelSelector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom" />
+
         <com.getbase.floatingactionbutton.FloatingActionsMenu
             android:id="@+id/menu_fab"
             android:layout_width="wrap_content"

@@ -16,6 +16,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    // This avoids the model compression when the app is build
     aaptOptions {
         noCompress "tflite"
         noCompress "lite"

@@ -70,12 +70,7 @@ public class CustomImageClassifier {
     private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
             new PriorityQueue<>(
                     RESULTS_TO_SHOW,
-                    new Comparator<Map.Entry<String, Float>>() {
-                        @Override
-                        public int compare(Map.Entry<String, Float> o1, Map.Entry<String, Float> o2) {
-                            return (o1.getValue()).compareTo(o2.getValue());
-                        }
-                    });
+                    (o1, o2) -> (o1.getValue()).compareTo(o2.getValue()));
 
     /** Initializes an {@code ImageClassifier}. */
     CustomImageClassifier(Activity activity) throws IOException {
@@ -200,7 +195,7 @@ public class CustomImageClassifier {
         final int size = sortedLabels.size();
         for (int i = 0; i < size; ++i) {
             Map.Entry<String, Float> label = sortedLabels.poll();
-            textToShow = String.format("\n%s: %4.2f",label.getKey(),label.getValue()) + "\n" + textToShow;
+            textToShow = String.format("\n%s: %4.2f\n",label.getKey(),label.getValue()) + textToShow;
         }
         return textToShow;
     }
